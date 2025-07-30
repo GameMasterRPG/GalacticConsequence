@@ -1,0 +1,145 @@
+REPLIT AI PROMPT — GALAXY OF CONSEQUENCE w/ NVIDIA ACE + NEMOTRON RAG
+
+You are Replit AI. Build a Flask-based RPG backend for a Star Wars–inspired system called Galaxy of Consequence. Integrate NVIDIA Nemotron RAG (via https://integrate.api.nvidia.com/v1/chat/completions) to power immersive NPC dialogue and real-time responses. Follow the Final Rule: persistent world, reactive NPCs, scalable threat, and immersive narrative logic.
+
+🎯 OBJECTIVES
+
+✅ Build a modular Flask app with:
+
+JWT Bearer auth (Bearer Abracadabra)
+
+SQLite via SQLAlchemy
+
+RAG-integrated NPC endpoint via NVIDIA Nemotron Mini 4B
+
+Procedural quest generation
+
+Multiplayer session state
+
+Faction AI logic
+
+Force morality engine
+
+Full OpenAPI 3.1 schema + Swagger UI at /docs
+
+Streamed responses from NVIDIA ACE/Nemotron
+
+🧱 TECH STACK
+
+Flask, Flask-JWT-Extended, Flask-SQLAlchemy, flask-cors, flask-swagger-ui
+
+requests for NVIDIA RAG integration
+
+SQLite backend
+
+openapi.yaml to describe schema
+
+🔐 AUTHENTICATION
+
+Use JWT Bearer Auth. Accept only:
+
+Authorization: Bearer Abracadabra
+
+🔌 NVIDIA ACE/NEMOTRON RAG INTEGRATION
+
+Endpoint:
+
+POST https://integrate.api.nvidia.com/v1/chat/completions
+
+Headers:
+
+Authorization: Bearer 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
+Accept: application/json
+Content-Type: application/json
+
+Payload (example):
+
+{
+"model": "nvidia/nemotron-mini-4b-instruct",
+"messages": [
+{"role": "system", "content": "You are a Sith on Korriban"},
+{"role": "user", "content": "Tell me what you know of the old Sith rituals."}
+],
+"temperature": 0.2,
+"top_p": 0.7,
+"max_tokens": 1024,
+"stream": true
+}
+
+📦 KEY API ROUTES TO IMPLEMENT
+
+Canvas
+
+POST /save_canvas
+
+GET /get_canvas?user=
+
+GET /get_canvas_by_id?id=
+
+GET /get_canvas_history?user=&campaign=&canvas=
+
+GET /get_log?canvas=&user=&align=
+
+Nemotron
+
+POST /query_nemotron → For immersive NPC dialogue (calls NVIDIA API, streams response)
+
+Faction AI
+
+POST /faction_tick → Real-time, persistent faction simulation
+
+Quest System
+
+POST /generate_quest → Procedural quest logic based on state + morality
+
+Multiplayer Sessions
+
+GET /get_session_state?session_id=
+
+POST /update_session_state
+
+Force Morality Engine
+
+POST /update_alignment
+
+GET /get_alignment?user=
+
+OpenAPI + Swagger
+
+GET /openapi.yaml
+
+GET /docs → Swagger UI via flask-swagger-ui
+
+🧬 MODELS (SQLAlchemy)
+
+CanvasEntry
+FactionState
+QuestLog
+SessionState
+ForceAlignment
+
+🔐 REQUIREMENTS.TXT
+
+Flask
+Flask-SQLAlchemy
+Flask-JWT-Extended
+flask-cors
+flask-swagger-ui
+requests
+python-dotenv
+
+🧪 TEST EXAMPLES
+
+NPC Query Test Payload
+
+{
+"model": "nvidia/nemotron-mini-4b-instruct",
+"messages": [
+{"role": "system", "content": "You are a Jedi archivist on Dantooine"},
+{"role": "user", "content": "What do you know about Darth Nihilus?"}
+],
+"temperature": 0.2,
+"top_p": 0.7,
+"max_tokens": 1024,
+"stream": true
+}

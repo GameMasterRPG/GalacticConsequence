@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: NVIDIA ACE RAG Integration for Galaxy of Consequence
+  version: 1.0.0
+servers:
+  - url: https://integrate.api.nvidia.com/v1
+paths:
+  /ace/rag_query:
+    post:
+      summary: Query NVIDIA ACE/Nemotron for lore or gameplay intelligence
+      operationId: ragIntelFromNvidiaAce
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RagQuery"
+      responses:
+        "200":
+          description: AI-powered lore or mission data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RagResponse"
+        "400":
+          description: Invalid request
+        "500":
+          description: Server error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    RagQuery:
+      type: object
+      required:
+        - characterId
+        - query
+      properties:
+        characterId:
+          type: integer
+          example: 42
+        query:
+          type: string
+          example: What are known weaknesses in Hapan stealth tech?
+    RagResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          example: Hapan stealth technology has limited resistance to ionic pulses above 4.2 kilojoules, particularly when
+            deployed in asteroid fields.
