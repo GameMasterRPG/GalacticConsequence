@@ -1,0 +1,959 @@
+openapi: 3.1.0
+info:
+  title: Galaxy of Consequence RPG Backend API
+  description: A comprehensive Star Wars RPG backend with NVIDIA Nemotron integration, persistent world simulation, reactive NPCs, and immersive Force mechanics following the Final Rule.
+  version: 1.0.0
+  contact:
+    name: Galaxy of Consequence API
+    email: api@galaxyofconsequence.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.galaxyofconsequence.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication
+  /authenticate:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate with Bearer token
+      description: Authenticate using the magical Bearer token to receive JWT access
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token
+                  message:
+                    type: string
+                  galaxy_status:
+                    type: string
+        '401':
+          description: Invalid Bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /verify:
+    get:
+      tags:
+        - Authentication
+      summary: Verify JWT token
+      security:
+        - JWTAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: string
+                  status:
+                    type: string
+                  message:
+                    type: string
+
+  # Canvas System
+  /save_canvas:
+    post:
+      tags:
+        - Canvas
+      summary: Save player game state
+      description: Save persistent game state to database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: string
+                  description: Player username
+                campaign:
+                  type: string
+                  default: default
+                canvas:
+                  type: string
+                  default: main
+                data:
+                  type: object
+                  description: Game state data
+                session_id:
+                  type: string
+                  description: Session identifier
+      responses:
+        '200':
+          description: Canvas saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  canvas_id:
+                    type: integer
+                  timestamp:
+                    type: string
+
+  /get_canvas:
+    get:
+      tags:
+        - Canvas
+      summary: Get latest canvas for user
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: campaign
+          in: query
+          schema:
+            type: string
+            default: default
+      responses:
+        '200':
+          description: Canvas retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanvasEntry'
+
+  /get_canvas_by_id:
+    get:
+      tags:
+        - Canvas
+      summary: Get canvas by ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Canvas retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanvasEntry'
+
+  /get_canvas_history:
+    get:
+      tags:
+        - Canvas
+      summary: Get canvas history
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: campaign
+          in: query
+          schema:
+            type: string
+            default: default
+        - name: canvas
+          in: query
+          schema:
+            type: string
+            default: main
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Canvas history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CanvasEntry'
+                  total_entries:
+                    type: integer
+
+  /get_log:
+    get:
+      tags:
+        - Canvas
+      summary: Get filtered log entries
+      parameters:
+        - name: canvas
+          in: query
+          schema:
+            type: string
+        - name: user
+          in: query
+          schema:
+            type: string
+        - name: align
+          in: query
+          schema:
+            type: string
+            description: Force alignment filter
+      responses:
+        '200':
+          description: Log entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  log_entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CanvasEntry'
+                  total_entries:
+                    type: integer
+                  filters_applied:
+                    type: object
+
+  # NVIDIA Nemotron Integration
+  /query_nemotron:
+    post:
+      tags:
+        - Nemotron
+      summary: Query NVIDIA Nemotron for NPC dialogue
+      description: Generate immersive NPC dialogue using NVIDIA Nemotron with streaming support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messages
+              properties:
+                model:
+                  type: string
+                  default: nvidia/nemotron-mini-4b-instruct
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                        enum: [system, user, assistant]
+                      content:
+                        type: string
+                temperature:
+                  type: number
+                  default: 0.2
+                top_p:
+                  type: number
+                  default: 0.7
+                max_tokens:
+                  type: integer
+                  default: 1024
+                stream:
+                  type: boolean
+                  default: true
+                user:
+                  type: string
+                  description: Player username for NPC memory
+                npc_name:
+                  type: string
+                  description: NPC name for memory tracking
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: NPC response generated (streaming or single)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-sent events for streaming
+            application/json:
+              schema:
+                type: object
+                description: Single response format
+
+  /generate_npc_dialogue:
+    post:
+      tags:
+        - Nemotron
+      summary: Generate contextual NPC dialogue
+      description: Generate NPC dialogue based on game state and NPC memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - npc_name
+              properties:
+                user:
+                  type: string
+                npc_name:
+                  type: string
+                situation:
+                  type: string
+                player_action:
+                  type: string
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: Contextual dialogue generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  npc_name:
+                    type: string
+                  dialogue:
+                    type: string
+                  context:
+                    type: object
+                  relationship_status:
+                    type: integer
+
+  # Faction AI System
+  /faction_tick:
+    post:
+      tags:
+        - Faction
+      summary: Execute faction AI simulation
+      description: Run autonomous faction AI turns for persistent world simulation
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                force_tick:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Faction tick executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  timestamp:
+                    type: string
+                  next_tick_in:
+                    type: string
+
+  /get_faction_state:
+    get:
+      tags:
+        - Faction
+      summary: Get faction state information
+      parameters:
+        - name: faction_name
+          in: query
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Faction state retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  faction:
+                    $ref: '#/components/schemas/FactionState'
+                  factions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FactionState'
+
+  /update_faction_relationship:
+    post:
+      tags:
+        - Faction
+      summary: Update faction relationship with player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - faction_name
+                - user
+              properties:
+                faction_name:
+                  type: string
+                user:
+                  type: string
+                relationship_change:
+                  type: integer
+                  default: 0
+                awareness_change:
+                  type: integer
+                  default: 0
+                action_description:
+                  type: string
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: Faction relationship updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  faction:
+                    type: string
+                  new_hostility:
+                    type: integer
+                  new_awareness:
+                    type: integer
+                  consequences:
+                    type: array
+                    items:
+                      type: string
+
+  # Quest System
+  /generate_quest:
+    post:
+      tags:
+        - Quest
+      summary: Generate procedural quest
+      description: Generate quest based on player state, faction relations, and Force alignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: string
+                session_id:
+                  type: string
+                difficulty:
+                  type: string
+                  enum: [easy, medium, hard, extreme]
+                  default: medium
+                quest_type:
+                  type: string
+                  enum: [combat, social, exploration, force, faction]
+                location:
+                  type: string
+      responses:
+        '200':
+          description: Quest generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  quest:
+                    $ref: '#/components/schemas/Quest'
+
+  /accept_quest:
+    post:
+      tags:
+        - Quest
+      summary: Accept available quest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quest_id
+                - user
+              properties:
+                quest_id:
+                  type: integer
+                user:
+                  type: string
+      responses:
+        '200':
+          description: Quest accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  quest_id:
+                    type: integer
+                  status:
+                    type: string
+                  title:
+                    type: string
+
+  /complete_quest:
+    post:
+      tags:
+        - Quest
+      summary: Complete active quest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quest_id
+                - user
+              properties:
+                quest_id:
+                  type: integer
+                user:
+                  type: string
+                completion_method:
+                  type: string
+                  default: standard
+                player_choices:
+                  type: array
+                  items:
+                    type: string
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: Quest completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  quest_id:
+                    type: integer
+                  title:
+                    type: string
+                  completion_result:
+                    type: object
+                  rewards_granted:
+                    type: array
+                  faction_changes:
+                    type: object
+                  force_alignment_change:
+                    type: integer
+                  consequences:
+                    type: array
+
+  # Session Management
+  /create_session:
+    post:
+      tags:
+        - Session
+      summary: Create multiplayer session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_name
+                - created_by
+              properties:
+                session_name:
+                  type: string
+                created_by:
+                  type: string
+                galaxy_state:
+                  type: object
+      responses:
+        '200':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  session_id:
+                    type: string
+                  session_name:
+                    type: string
+                  created_by:
+                    type: string
+                  galaxy_state:
+                    type: object
+
+  /get_session_state:
+    get:
+      tags:
+        - Session
+      summary: Get session state
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session state retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionState'
+
+  # Force System
+  /update_alignment:
+    post:
+      tags:
+        - Force
+      summary: Update Force alignment
+      description: Update player Force alignment with cascading consequences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - action_type
+              properties:
+                user:
+                  type: string
+                action_type:
+                  type: string
+                  enum: [light, dark, neutral]
+                action_description:
+                  type: string
+                force_magnitude:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 1
+                witnesses:
+                  type: array
+                  items:
+                    type: string
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: Force alignment updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  alignment_change:
+                    type: integer
+                  new_alignment:
+                    type: integer
+                  alignment_description:
+                    type: string
+                  force_consequences:
+                    type: array
+                  unlocked_powers:
+                    type: array
+                  corruption_level:
+                    type: integer
+                  npc_reactions:
+                    type: array
+
+  /get_alignment:
+    get:
+      tags:
+        - Force
+      summary: Get Force alignment
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Force alignment retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForceAlignment'
+
+  /use_force_power:
+    post:
+      tags:
+        - Force
+      summary: Use Force power
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - power_name
+              properties:
+                user:
+                  type: string
+                power_name:
+                  type: string
+                target:
+                  type: string
+                intent:
+                  type: string
+                  enum: [light, dark, neutral]
+                  default: neutral
+                power_level:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 1
+                session_id:
+                  type: string
+      responses:
+        '200':
+          description: Force power used
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                  effect_description:
+                    type: string
+                  alignment_change:
+                    type: integer
+                  force_cost:
+                    type: integer
+                  consequences:
+                    type: array
+                  witnesses_affected:
+                    type: array
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Use 'Abracadabra' as the Bearer token
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /authenticate endpoint
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status_code:
+          type: integer
+        error_code:
+          type: string
+        details:
+          type: object
+
+    CanvasEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: string
+        campaign:
+          type: string
+        canvas:
+          type: string
+        data:
+          type: object
+        timestamp:
+          type: string
+        session_id:
+          type: string
+
+    FactionState:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        territory_control:
+          type: integer
+        resources:
+          type: integer
+        influence:
+          type: integer
+        awareness_level:
+          type: integer
+        hostility_level:
+          type: integer
+        active_operations:
+          type: array
+        strategic_goals:
+          type: array
+        last_action:
+          type: string
+
+    Quest:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        giver:
+          type: string
+        rewards:
+          type: object
+        requirements:
+          type: array
+        difficulty:
+          type: integer
+        faction_impact:
+          type: object
+        force_impact:
+          type: integer
+        generation_reason:
+          type: string
+        status:
+          type: string
+
+    SessionState:
+      type: object
+      properties:
+        session_id:
+          type: string
+        session_name:
+          type: string
+        galaxy_state:
+          type: object
+        active_players:
+          type: array
+          items:
+            type: string
+        current_galactic_year:
+          type: integer
+        major_events:
+          type: array
+        faction_war_status:
+          type: object
+        force_nexus_events:
+          type: array
+        threat_escalation_level:
+          type: integer
+        last_faction_tick:
+          type: string
+        updated_at:
+          type: string
+
+    ForceAlignment:
+      type: object
+      properties:
+        user:
+          type: string
+        force_sensitive:
+          type: boolean
+        light_side_points:
+          type: integer
+        dark_side_points:
+          type: integer
+        net_alignment:
+          type: integer
+        alignment_description:
+          type: string
+        corruption_level:
+          type: integer
+        force_events:
+          type: array
+        alignment_history:
+          type: array
+        force_powers:
+          type: array
+        last_force_event:
+          type: string
+
+tags:
+  - name: Authentication
+    description: Bearer token and JWT authentication
+  - name: Canvas
+    description: Persistent game state management
+  - name: Nemotron
+    description: NVIDIA Nemotron AI integration for NPC dialogue
+  - name: Faction
+    description: Autonomous faction AI simulation
+  - name: Quest
+    description: Procedural quest generation and management
+  - name: Session
+    description: Multiplayer session management
+  - name: Force
+    description: Force alignment and power system

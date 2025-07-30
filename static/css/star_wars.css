@@ -1,0 +1,638 @@
+/* Galaxy of Consequence - Star Wars Theme CSS */
+
+/* Import Star Wars-appropriate fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Electrolize:wght@400&display=swap');
+
+/* Global Variables */
+:root {
+    --imperial-gold: #ffd700;
+    --rebel-blue: #00ffff;
+    --sith-red: #ff4444;
+    --jedi-green: #00ff00;
+    --space-black: #0a0a0a;
+    --star-destroyer-gray: #1a1a2e;
+    --deep-space: #16213e;
+    --hyperspace-blue: #0066cc;
+    --carbon-freeze: #444444;
+    --lightsaber-glow: rgba(0, 255, 255, 0.6);
+    --force-energy: rgba(138, 43, 226, 0.3);
+}
+
+/* Universal Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, var(--space-black) 0%, var(--star-destroyer-gray) 50%, var(--deep-space) 100%);
+    font-family: 'Orbitron', 'Arial', sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+/* Add subtle starfield animation */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: starfield 20s linear infinite;
+    z-index: -1;
+    opacity: 0.1;
+}
+
+@keyframes starfield {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100px); }
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: var(--imperial-gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: var(--rebel-blue);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+}
+
+p, span, div {
+    font-family: 'Electrolize', 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+/* Datapad HUD Styles */
+.datapad-container {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--imperial-gold);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.datapad-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--imperial-gold), var(--rebel-blue), var(--imperial-gold));
+    border-radius: 15px;
+    z-index: -1;
+    animation: borderPulse 3s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.datapad-header {
+    text-align: center;
+    border-bottom: 1px solid var(--carbon-freeze);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.datapad-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--imperial-gold);
+}
+
+.datapad-section {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid var(--rebel-blue);
+    border-radius: 5px;
+}
+
+.datapad-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.datapad-field:last-child {
+    border-bottom: none;
+}
+
+.datapad-label {
+    font-weight: bold;
+    color: var(--rebel-blue);
+    min-width: 150px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.datapad-value {
+    color: #ffffff;
+    text-align: right;
+    flex: 1;
+}
+
+/* Force Alignment Meter */
+.force-meter {
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--carbon-freeze);
+}
+
+.force-meter-fill {
+    height: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.force-meter-fill.light-side {
+    background: linear-gradient(90deg, var(--jedi-green), #00aa00);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.force-meter-fill.dark-side {
+    background: linear-gradient(90deg, var(--sith-red), #aa0000);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.force-meter-fill.balanced {
+    background: linear-gradient(90deg, #8a2be2, #6a1b9a);
+    box-shadow: 0 0 10px var(--force-energy);
+}
+
+/* Faction Status Indicators */
+.faction-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.faction-status.allied {
+    background: rgba(0, 255, 0, 0.2);
+    border: 1px solid var(--jedi-green);
+    color: var(--jedi-green);
+}
+
+.faction-status.neutral {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--carbon-freeze);
+    color: #cccccc;
+}
+
+.faction-status.hostile {
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid var(--sith-red);
+    color: var(--sith-red);
+}
+
+.faction-status.unknown {
+    background: rgba(138, 43, 226, 0.2);
+    border: 1px solid #8a2be2;
+    color: #8a2be2;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, var(--hyperspace-blue), var(--rebel-blue));
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+}
+
+.btn:hover {
+    background: linear-gradient(45deg, var(--rebel-blue), var(--hyperspace-blue));
+    box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn.btn-primary {
+    background: linear-gradient(45deg, var(--imperial-gold), #ffed4e);
+    color: var(--space-black);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+}
+
+.btn.btn-danger {
+    background: linear-gradient(45deg, var(--sith-red), #ff6666);
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+}
+
+.btn.btn-danger:hover {
+    box-shadow: 0 6px 20px rgba(255, 68, 68, 0.5);
+}
+
+.btn.btn-success {
+    background: linear-gradient(45deg, var(--jedi-green), #00aa00);
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+}
+
+.btn.btn-success:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 0, 0.5);
+}
+
+/* Input Fields */
+.form-control {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--carbon-freeze);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #ffffff;
+    font-family: 'Electrolize', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--rebel-blue);
+    box-shadow: 0 0 10px var(--lightsaber-glow);
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.form-control::placeholder {
+    color: #888888;
+    font-style: italic;
+}
+
+/* Cards and Panels */
+.card {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--carbon-freeze);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    border-color: var(--imperial-gold);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--carbon-freeze);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.card-header h3 {
+    margin: 0;
+    color: var(--imperial-gold);
+}
+
+/* Alerts and Notifications */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-weight: bold;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    background: rgba(0, 102, 204, 0.2);
+    border-left-color: var(--hyperspace-blue);
+    color: var(--rebel-blue);
+}
+
+.alert-success {
+    background: rgba(0, 255, 0, 0.2);
+    border-left-color: var(--jedi-green);
+    color: var(--jedi-green);
+}
+
+.alert-warning {
+    background: rgba(255, 215, 0, 0.2);
+    border-left-color: var(--imperial-gold);
+    color: var(--imperial-gold);
+}
+
+.alert-danger {
+    background: rgba(255, 68, 68, 0.2);
+    border-left-color: var(--sith-red);
+    color: var(--sith-red);
+}
+
+/* Loading Animations */
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--rebel-blue);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: var(--rebel-blue);
+    font-family: 'Orbitron', sans-serif;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Hologram Effect */
+.hologram {
+    position: relative;
+    color: var(--rebel-blue);
+    text-shadow: 0 0 10px currentColor;
+    animation: hologramFlicker 3s ease-in-out infinite;
+}
+
+.hologram::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 48%, rgba(0, 255, 255, 0.1) 49%, rgba(0, 255, 255, 0.1) 51%, transparent 52%);
+    animation: scanlines 0.1s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes hologramFlicker {
+    0%, 98% { opacity: 1; }
+    99% { opacity: 0.9; }
+    99.5% { opacity: 1; }
+}
+
+@keyframes scanlines {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--space-black);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--imperial-gold), var(--hyperspace-blue));
+    border-radius: 6px;
+    border: 2px solid var(--space-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, var(--rebel-blue), var(--imperial-gold));
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.table th {
+    background: rgba(255, 215, 0, 0.2);
+    color: var(--imperial-gold);
+    padding: 15px;
+    text-align: left;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--imperial-gold);
+}
+
+.table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.table tr:hover {
+    background: rgba(0, 255, 255, 0.1);
+}
+
+/* Modal/Dialog Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-dialog {
+    background: var(--space-black);
+    border: 2px solid var(--imperial-gold);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--carbon-freeze);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    color: var(--imperial-gold);
+    margin: 0;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--carbon-freeze);
+    padding-top: 15px;
+    margin-top: 20px;
+    text-align: right;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .datapad-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .datapad-field {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .datapad-label {
+        min-width: auto;
+        margin-bottom: 5px;
+    }
+    
+    .datapad-value {
+        text-align: left;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.align-items-center { align-items: center; }
+
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+/* Special Effects */
+.glow-text {
+    text-shadow: 0 0 15px currentColor;
+    animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    from { text-shadow: 0 0 15px currentColor; }
+    to { text-shadow: 0 0 25px currentColor, 0 0 35px currentColor; }
+}
+
+.shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Force-specific styling */
+.force-light {
+    color: var(--jedi-green);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.force-dark {
+    color: var(--sith-red);
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.force-balanced {
+    color: #8a2be2;
+    text-shadow: 0 0 10px var(--force-energy);
+}
+
+/* Faction-specific colors */
+.imperial-text { color: var(--imperial-gold); }
+.rebel-text { color: var(--rebel-blue); }
+.criminal-text { color: #ff8c00; }
+.corporate-text { color: #32cd32; }

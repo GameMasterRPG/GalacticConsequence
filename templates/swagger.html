@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy of Consequence API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/star_wars.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Orbitron', 'Arial', sans-serif;
+        }
+        
+        .swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .api-header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .api-header h1 {
+            color: #ffd700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-weight: bold;
+        }
+        
+        .api-header p {
+            color: #00ffff;
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        
+        .galaxy-description {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+        
+        .feature-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .feature-card p {
+            color: #cccccc;
+            line-height: 1.5;
+        }
+        
+        .auth-info {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff4444;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .auth-info h3 {
+            color: #ff4444;
+            margin-bottom: 10px;
+        }
+        
+        .auth-info code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffd700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Swagger UI Customizations */
+        .swagger-ui .topbar {
+            display: none;
+        }
+        
+        .swagger-ui .info {
+            margin-bottom: 0;
+        }
+        
+        .swagger-ui .scheme-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+        }
+        
+        .swagger-ui .opblock-tag {
+            border-bottom: 1px solid #333;
+        }
+        
+        .swagger-ui .opblock.opblock-post {
+            border-color: #49cc90;
+            background: rgba(73, 204, 144, 0.1);
+        }
+        
+        .swagger-ui .opblock.opblock-get {
+            border-color: #61affe;
+            background: rgba(97, 175, 254, 0.1);
+        }
+        
+        .swagger-ui .btn.authorize {
+            background: #ffd700;
+            color: #000;
+            border-color: #ffd700;
+        }
+        
+        .swagger-ui .btn.authorize:hover {
+            background: #ffed4e;
+            border-color: #ffed4e;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="api-header">
+        <h1>🌌 GALAXY OF CONSEQUENCE</h1>
+        <p>RPG Backend API Documentation</p>
+        <p>Powered by NVIDIA Nemotron & The Final Rule</p>
+    </div>
+    
+    <div class="swagger-ui">
+        <div class="galaxy-description">
+            <h2 style="color: #ffd700; margin-bottom: 15px;">Welcome to the Galaxy</h2>
+            <p>
+                The Galaxy of Consequence is a comprehensive Star Wars RPG backend that implements the 
+                <strong style="color: #00ffff;">Final Rule</strong>: a persistent world with reactive NPCs, 
+                scalable threat systems, and immersive narrative logic powered by NVIDIA Nemotron AI.
+            </p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🤖 NVIDIA Nemotron Integration</h3>
+                <p>Advanced AI-powered NPC dialogue and world generation using NVIDIA's cutting-edge language models for truly immersive interactions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🏛️ Autonomous Faction AI</h3>
+                <p>Factions make independent decisions, wage wars, form alliances, and respond to player actions in a living, breathing galaxy.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>⚔️ Procedural Quest System</h3>
+                <p>Quests generate dynamically based on faction tensions, player history, Force alignment, and current galactic events.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🌟 Force Alignment Engine</h3>
+                <p>Every action has consequences. Light and Dark Side choices cascade through the galaxy, affecting NPCs, factions, and world events.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📡 Reactive NPC Memory</h3>
+                <p>NPCs remember every interaction, forming opinions and relationships that evolve based on player behavior and reputation.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🎯 Scalable Threat System</h3>
+                <p>Player notoriety triggers escalating responses from bounty hunters, Imperial forces, and faction-specific consequences.</p>
+            </div>
+        </div>
+        
+        <div class="auth-info">
+            <h3>🔐 Authentication Required</h3>
+            <p>
+                Most endpoints require Bearer token authentication. Use the magical token: 
+                <code>Bearer Abracadabra</code>
+            </p>
+            <p>
+                Some endpoints also support JWT tokens obtained from the <code>/authenticate</code> endpoint.
+            </p>
+        </div>
+        
+        <div id="swagger-ui"></div>
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Begin Swagger UI call region
+            const ui = SwaggerUIBundle({
+                url: '/openapi.yaml',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                theme: "dark",
+                syntaxHighlight: {
+                    activate: true,
+                    theme: "obsidian"
+                },
+                tryItOutEnabled: true,
+                requestInterceptor: function(request) {
+                    // Add default bearer token if not present
+                    if (!request.headers.Authorization && !request.url.includes('/authenticate')) {
+                        request.headers.Authorization = 'Bearer Abracadabra';
+                    }
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Log responses for debugging
+                    console.log('API Response:', response);
+                    return response;
+                },
+                onComplete: function() {
+                    console.log('Galaxy of Consequence API Documentation loaded successfully!');
+                    
+                    // Add custom styling after Swagger UI loads
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .swagger-ui {
+                            color: #ffffff !important;
+                        }
+                        .swagger-ui .wrapper {
+                            background: transparent !important;
+                        }
+                        .swagger-ui .info .title {
+                            color: #ffd700 !important;
+                        }
+                        .swagger-ui .info .description {
+                            color: #cccccc !important;
+                        }
+                        .swagger-ui .opblock-summary-description {
+                            color: #ffffff !important;
+                        }
+                        .swagger-ui .parameter__name {
+                            color: #ffd700 !important;
+                        }
+                        .swagger-ui .response-col_status {
+                            color: #61affe !important;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            });
+            // End Swagger UI call region
+        };
+    </script>
+</body>
+</html>
