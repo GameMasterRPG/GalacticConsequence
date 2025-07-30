@@ -36,25 +36,55 @@ def save_canvas():
     session_id = data.get('session_id')
     
     # Create new canvas entry
-    canvas_entry = CanvasEntry(
-        user=user,
-        campaign=campaign,
-        canvas=canvas,
-        data=json.dumps({
-            'data': game_data,
-            'meta': meta
-        }),
-        session_id=session_id
-    )
-    
-    db.session.add(canvas_entry)
-    db.session.commit()
-    
-    return jsonify({
-        'status': 'success',
-        'message': 'Canvas saved successfully',
-        'id': str(canvas_entry.id)
-    })
+    canvas_entry = CanvasEntry{
+      "canvas": "Force HUD",
+      "user": "D'mir Hollaron",
+      "meta": {
+        "campaign": "Galaxy of Consequence – Rise of the Sith (50 ABY)",
+        "version": "v3.3",
+        "timestamp": "2025-07-30T23:59:00Z",
+        "source": "Prison Break – 1313",
+        "system_flags": {
+          "auto_save": true,
+          "sandbox_mode": false,
+          "gm_override": true
+        }
+      },
+      "data": {
+        "character": {
+          "name": "D’mir Hollaron",
+          "species": "Human",
+          "age": 18,
+          "origin": "Coruscant, Level 1313",
+          "alignment": "Dark",
+          "force_affinity": "Latent",
+          "reputation": "Imprisoned",
+          "appearance": "Youthful, Sith eyes, twin Dutch braids, scarred, brown skin",
+          "equipment": [],
+          "traits": ["Cunning", "Survivor", "Force Intuition"],
+          "goal": "Wealth",
+          "standing": "Hates syndicates, slavers, and gangs",
+          "location": "Coruscant Substructure – Prison Supply Closet, Sector 3D"
+        },
+        "session": {
+          "status": "Active",
+          "scenario": "Prison Escape - 1313",
+          "inventory": ["Encrypted Navchip"],
+          "known_contacts": ["Kelvek (mentor, missing)"],
+          "known_enemies": ["Black Sun", "Syndicates", "Slaver Cabals"],
+          "faction_clocks": {
+            "Black Sun": "Alert – Pursuit Triggered",
+            "CSA": "Monitoring – Low Signal Anomaly"
+          },
+          "force_resonance": {
+            "Byss": "Linked",
+            "Local Vergence": "Active",
+            "Sith Conclave": "Mentioned"
+          }
+        }
+      }
+    }
+
 
 @canvas_bp.route('/get_canvas', methods=['GET'])
 def get_canvas():
