@@ -113,3 +113,14 @@ Preferred communication style: Simple, everyday language.
 - Database URL configuration for different environments
 
 The system is designed to be modular and extensible, with each component handling specific aspects of the RPG experience while maintaining interconnected relationships that create meaningful consequences for player actions.
+
+## Recent Changes
+
+### July 30, 2025 - RPG HUD API Compatibility Update
+- Updated canvas endpoints to match RPG HUD API specification with required schema
+- Modified `/save_canvas` to require `canvas`, `user`, `data`, and `meta` fields per specification
+- Updated response formats to include `status` field and proper error handling
+- Modified `/query_nemotron` to use `message` field instead of `messages` array for compatibility
+- Added missing endpoints: `/get_canvas_by_id`, `/get_log`, `/get_canvas_history`
+- Maintained backward compatibility with existing Galaxy of Consequence features
+- All endpoints tested and working with Bearer token authentication "Abracadabra"

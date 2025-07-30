@@ -1,4 +1,6 @@
-# Galaxy of Consequence - API Testing Guide
+# Galaxy of Consequence - RPG HUD API Testing Guide
+
+## ✅ Updated to Match RPG HUD API Specification
 
 ## Base URL
 ```
@@ -34,32 +36,103 @@ curl -X GET http://localhost:5000/verify \
 
 ### Character Management
 
-#### Save Character Data (Canvas)
+#### Save Character Data (Canvas) - RPG HUD API Format
 ```bash
 curl -X POST http://localhost:5000/save_canvas \
   -H "Authorization: Bearer Abracadabra" \
   -H "Content-Type: application/json" \
   -d '{
-    "user": "Luke_Skywalker",
-    "canvas": "character_sheet",
+    "canvas": "Force_HUD",
+    "user": "house_universal",
     "data": {
       "name": "Luke Skywalker",
       "species": "Human",
       "homeworld": "Tatooine",
       "background": "Moisture Farmer",
       "allegiance": "Rebel Alliance",
+      "force_alignment": "Light Side",
+      "lightsaber_color": "Blue",
       "appearance": "Young human male with blonde hair and blue eyes",
       "primary_weapon": "Lightsaber",
       "secondary_weapon": "DL-44 Blaster",
       "armor": "Jedi Robes",
       "skills": ["Piloting", "Force Sensitivity", "Lightsaber Combat"]
+    },
+    "meta": {
+      "campaign": "Galaxy of Consequence",
+      "version": "1.0.5",
+      "timestamp": "2025-07-30T15:55:00Z",
+      "source": "GPT",
+      "system_flags": {
+        "auto_save": true,
+        "sandbox_mode": false,
+        "gm_override": false
+      }
     }
   }'
 ```
 
-#### Get Character Data
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Canvas saved successfully",
+  "id": "2"
+}
+```
+
+#### Get Latest Canvas Data
 ```bash
-curl -X GET "http://localhost:5000/get_canvas?user=Luke_Skywalker" \
+curl -X GET "http://localhost:5000/get_canvas?user=house_universal&canvas=Force_HUD" \
+  -H "Authorization: Bearer Abracadabra"
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "canvas": {
+    "id": 2,
+    "user": "house_universal",
+    "campaign": "Galaxy of Consequence",
+    "canvas": "Force_HUD",
+    "data": {
+      "name": "Luke Skywalker",
+      "species": "Human",
+      "force_alignment": "Light Side",
+      "lightsaber_color": "Blue"
+    },
+    "meta": {
+      "campaign": "Galaxy of Consequence",
+      "version": "1.0.5",
+      "source": "GPT",
+      "system_flags": {
+        "auto_save": true,
+        "sandbox_mode": false,
+        "gm_override": false
+      }
+    },
+    "timestamp": "2025-07-30T15:54:51.491135",
+    "session_id": null
+  }
+}
+```
+
+#### Get Canvas by ID
+```bash
+curl -X GET "http://localhost:5000/get_canvas_by_id?id=2" \
+  -H "Authorization: Bearer Abracadabra"
+```
+
+#### Get Canvas History
+```bash
+curl -X GET "http://localhost:5000/get_canvas_history?user=house_universal&campaign=Galaxy%20of%20Consequence" \
+  -H "Authorization: Bearer Abracadabra"
+```
+
+#### Get Canvas Log (Filtered)
+```bash
+curl -X GET "http://localhost:5000/get_log?canvas=Force_HUD&user=house_universal" \
   -H "Authorization: Bearer Abracadabra"
 ```
 
@@ -213,21 +286,48 @@ curl -X POST http://localhost:5000/join_session \
 
 ### NVIDIA Nemotron AI Integration
 
-#### Query Nemotron for NPC Dialogue
+#### Query Nemotron for NPC Dialogue - RPG HUD API Format
 ```bash
 curl -X POST http://localhost:5000/query_nemotron \
   -H "Authorization: Bearer Abracadabra" \
   -H "Content-Type: application/json" \
   -d '{
+    "message": "Young Skywalker, tell me about your training on Dagobah.",
     "user": "Luke_Skywalker",
-    "npc_name": "Obi-Wan Kenobi",
-    "query": "Tell me about the Force",
+    "npc_name": "Yoda",
     "context": {
-      "location": "Tatooine",
-      "setting": "Ben Kenobi hut",
-      "situation": "Training session"
+      "location": "Dagobah",
+      "setting": "Swamp training ground",
+      "time": "During Empire Strikes Back"
     }
   }'
+```
+
+**Response:**
+```json
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "content": "Well, Master Yoda, my training on Dagobah has been... challenging. The swamp is a harsh mistress, and the Force is ever-present, but elusive.",
+        "role": "assistant"
+      },
+      "stop_reason": null
+    }
+  ],
+  "created": 1753890902,
+  "id": "chat-ec6d02a203d94abbb94c1d19d8d0e12a",
+  "model": "nvidia/nemotron-mini-4b-instruct",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 34,
+    "prompt_tokens": 75,
+    "total_tokens": 109
+  }
+}
 ```
 
 #### Stream Nemotron Response (WebSocket-like)

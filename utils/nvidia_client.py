@@ -11,6 +11,18 @@ logger = logging.getLogger(__name__)
 NVIDIA_API_BASE_URL = "https://integrate.api.nvidia.com/v1"
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
 
+def query_nemotron_direct(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Query NVIDIA Nemotron API with direct response (non-streaming)
+    
+    Args:
+        payload: The request payload for the API
+        
+    Returns:
+        Dict containing full API response
+    """
+    return query_nemotron_streaming(payload, stream=False)
+
 def query_nemotron_streaming(payload: Dict[str, Any], stream: bool = True) -> Iterator[Dict[str, Any]]:
     """
     Query NVIDIA Nemotron API with streaming or single response

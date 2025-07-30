@@ -10,20 +10,29 @@ canvas_bp = Blueprint('canvas', __name__)
 @canvas_bp.route('/save_canvas', methods=['POST'])
 def save_canvas():
     """
-    Save player game state to persistent storage
+    Save any RPG canvas type (Force HUD, Summary, etc.)
     """
     if not check_bearer_auth():
         return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
     
     data = request.get_json()
     
-    if not data or 'user' not in data:
-        return jsonify({'error': 'Missing required field: user'}), 400
+    # Validate required fields per RPG HUD API spec
+    if not data:
+        return jsonify({'error': 'Missing request body'}), 400
+    
+    required_fields = ['canvas', 'user', 'data', 'meta']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
     
     user = data['user']
-    campaign = data.get('campaign', 'default')
-    canvas = data.get('canvas', 'main')
-    game_data = data.get('data', {})
+    canvas = data['canvas']
+    game_data = data['data']
+    meta = data['meta']
+    
+    # Extract campaign from meta if available
+    campaign = meta.get('campaign', 'default')
     session_id = data.get('session_id')
     
     # Create new canvas entry
@@ -31,7 +40,10 @@ def save_canvas():
         user=user,
         campaign=campaign,
         canvas=canvas,
-        data=json.dumps(game_data),
+        data=json.dumps({
+            'data': game_data,
+            'meta': meta
+        }),
         session_id=session_id
     )
     
@@ -39,39 +51,55 @@ def save_canvas():
     db.session.commit()
     
     return jsonify({
+        'status': 'success',
         'message': 'Canvas saved successfully',
-        'canvas_id': canvas_entry.id,
-        'timestamp': canvas_entry.timestamp.isoformat()
+        'id': str(canvas_entry.id)
     })
 
 @canvas_bp.route('/get_canvas', methods=['GET'])
 def get_canvas():
     """
-    Retrieve latest canvas for a user
+    Retrieve the latest saved canvas
     """
-    if not check_bearer_auth():
-        return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
-    
     user = request.args.get('user')
     campaign = request.args.get('campaign', 'default')
+    canvas_type = request.args.get('canvas')
     
-    if not user:
-        return jsonify({'error': 'Missing required parameter: user'}), 400
+    query = CanvasEntry.query
     
-    canvas_entry = CanvasEntry.query.filter_by(
-        user=user, 
-        campaign=campaign
-    ).order_by(CanvasEntry.timestamp.desc()).first()
+    if user:
+        query = query.filter_by(user=user)
+    if campaign:
+        query = query.filter_by(campaign=campaign)
+    if canvas_type:
+        query = query.filter_by(canvas=canvas_type)
+    
+    canvas_entry = query.order_by(CanvasEntry.timestamp.desc()).first()
     
     if not canvas_entry:
-        return jsonify({'error': 'No canvas found for user'}), 404
+        return jsonify({'status': 'error', 'message': 'No canvas found'}), 404
     
-    return jsonify(canvas_entry.to_dict())
+    # Parse the stored data
+    stored_data = json.loads(canvas_entry.data) if canvas_entry.data else {}
+    
+    return jsonify({
+        'status': 'success',
+        'canvas': {
+            'id': canvas_entry.id,
+            'user': canvas_entry.user,
+            'campaign': canvas_entry.campaign,
+            'canvas': canvas_entry.canvas,
+            'data': stored_data.get('data', {}),
+            'meta': stored_data.get('meta', {}),
+            'timestamp': canvas_entry.timestamp.isoformat(),
+            'session_id': canvas_entry.session_id
+        }
+    })
 
 @canvas_bp.route('/get_canvas_by_id', methods=['GET'])
 def get_canvas_by_id():
     """
-    Retrieve specific canvas by ID
+    Get a canvas by ID
     """
     if not check_bearer_auth():
         return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
@@ -84,48 +112,100 @@ def get_canvas_by_id():
     canvas_entry = CanvasEntry.query.get(canvas_id)
     
     if not canvas_entry:
-        return jsonify({'error': 'Canvas not found'}), 404
+        return jsonify({'status': 'error', 'message': 'Canvas not found'}), 404
     
-    return jsonify(canvas_entry.to_dict())
+    # Parse the stored data
+    stored_data = json.loads(canvas_entry.data) if canvas_entry.data else {}
+    
+    return jsonify({
+        'status': 'success',
+        'canvas': {
+            'id': canvas_entry.id,
+            'user': canvas_entry.user,
+            'campaign': canvas_entry.campaign,
+            'canvas': canvas_entry.canvas,
+            'data': stored_data.get('data', {}),
+            'meta': stored_data.get('meta', {}),
+            'timestamp': canvas_entry.timestamp.isoformat(),
+            'session_id': canvas_entry.session_id
+        }
+    })
 
 @canvas_bp.route('/get_canvas_history', methods=['GET'])
 def get_canvas_history():
     """
-    Retrieve canvas history for user/campaign
+    Retrieve full save history with filters
     """
-    if not check_bearer_auth():
-        return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
-    
     user = request.args.get('user')
-    campaign = request.args.get('campaign', 'default')
-    canvas = request.args.get('canvas', 'main')
-    limit = int(request.args.get('limit', 10))
+    campaign = request.args.get('campaign')
+    canvas_type = request.args.get('canvas')
     
-    if not user:
-        return jsonify({'error': 'Missing required parameter: user'}), 400
+    query = CanvasEntry.query
     
-    entries = CanvasEntry.query.filter_by(
-        user=user,
-        campaign=campaign,
-        canvas=canvas
-    ).order_by(CanvasEntry.timestamp.desc()).limit(limit).all()
+    if user:
+        query = query.filter_by(user=user)
+    if campaign:
+        query = query.filter_by(campaign=campaign)
+    if canvas_type:
+        query = query.filter_by(canvas=canvas_type)
+    
+    entries = query.order_by(CanvasEntry.timestamp.desc()).all()
+    
+    history = []
+    for entry in entries:
+        stored_data = json.loads(entry.data) if entry.data else {}
+        history.append({
+            'id': entry.id,
+            'user': entry.user,
+            'campaign': entry.campaign,
+            'canvas': entry.canvas,
+            'data': stored_data.get('data', {}),
+            'meta': stored_data.get('meta', {}),
+            'timestamp': entry.timestamp.isoformat(),
+            'session_id': entry.session_id
+        })
     
     return jsonify({
-        'history': [entry.to_dict() for entry in entries],
-        'total_entries': len(entries)
+        'status': 'success',
+        'history': history
     })
 
 @canvas_bp.route('/get_log', methods=['GET'])
 def get_log():
     """
-    Get filtered log entries for canvas/user/alignment
+    Get canvas history by type or user
     """
-    if not check_bearer_auth():
-        return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
-    
-    canvas = request.args.get('canvas')
+    canvas_type = request.args.get('canvas')
     user = request.args.get('user')
-    align = request.args.get('align')  # Filter by force alignment if provided
+    align = request.args.get('align')
+    
+    query = CanvasEntry.query
+    
+    if canvas_type:
+        query = query.filter_by(canvas=canvas_type)
+    if user:
+        query = query.filter_by(user=user)
+    
+    entries = query.order_by(CanvasEntry.timestamp.desc()).all()
+    
+    log = []
+    for entry in entries:
+        stored_data = json.loads(entry.data) if entry.data else {}
+        log.append({
+            'id': entry.id,
+            'user': entry.user,
+            'campaign': entry.campaign,
+            'canvas': entry.canvas,
+            'data': stored_data.get('data', {}),
+            'meta': stored_data.get('meta', {}),
+            'timestamp': entry.timestamp.isoformat(),
+            'session_id': entry.session_id
+        })
+    
+    return jsonify({
+        'status': 'success',
+        'log': log
+    })
     
     query = CanvasEntry.query
     

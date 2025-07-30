@@ -1,0 +1,237 @@
+openapi: 3.1.0
+info:
+  title: RPG HUD API
+  version: 1.1.2
+servers:
+  - url: 
+    description: Render-hosted Flask API
+paths:
+  /save_canvas:
+    post:
+      summary: Save any RPG canvas type (Force HUD, Summary, etc.)
+      operationId: saveCanvas
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CanvasEntry"
+      responses:
+        "200":
+          description: Canvas saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  id:
+                    type: string
+        "401":
+          description: Unauthorized
+        "500":
+          description: Server error
+  /get_canvas:
+    get:
+      summary: Retrieve the latest saved canvas
+      operationId: getCanvas
+      responses:
+        "200":
+          description: Latest canvas returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  canvas:
+                    type: object
+        "404":
+          description: No canvas found
+  /get_canvas_by_id:
+    get:
+      summary: Get a canvas by ID
+      operationId: getCanvasById
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Canvas found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  canvas:
+                    type: object
+        "404":
+          description: Canvas not found
+  /get_log:
+    get:
+      summary: Get canvas history by type or user
+      operationId: getLog
+      parameters:
+        - in: query
+          name: canvas
+          schema:
+            type: string
+        - in: query
+          name: user
+          schema:
+            type: string
+        - in: query
+          name: align
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Filtered canvas log
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  log:
+                    type: array
+                    items:
+                      type: object
+  /get_canvas_history:
+    get:
+      summary: Retrieve full save history with filters
+      operationId: getCanvasHistory
+      parameters:
+        - in: query
+          name: user
+          schema:
+            type: string
+        - in: query
+          name: campaign
+          schema:
+            type: string
+        - in: query
+          name: canvas
+          schema:
+            type: string
+      responses:
+        "200":
+          description: History returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  history:
+                    type: array
+                    items:
+                      type: object
+  /query_nemotron:
+    post:
+      summary: Generate immersive, lore-accurate NPC dialogue
+      description: |
+        Chat with Star Wars RPG NPCs using NVIDIA Nemotron. Returns immersive in-universe responses.
+      operationId: queryNemotron
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: The player's prompt to the NPC.
+      responses:
+        "200":
+          description: NPC response from Nemotron
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  choices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                            content:
+                              type: string
+        "500":
+          description: Server error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Use 'Bearer Abracadabra' for this dev API.
+  schemas:
+    CanvasEntry:
+      type: object
+      required:
+        - canvas
+        - user
+        - data
+        - meta
+      properties:
+        canvas:
+          type: string
+          example: Force_HUD
+        user:
+          type: string
+          example: house_universal
+        data:
+          type: object
+          description: Dynamic canvas content
+        meta:
+          type: object
+          properties:
+            campaign:
+              type: string
+              example: Galaxy of Consequence
+            version:
+              type: string
+              example: 1.0.5
+            timestamp:
+              type: string
+              format: date-time
+              example: 2025-06-10T22:34:00Z
+            source:
+              type: string
+              example: GPT
+            system_flags:
+              type: object
+              properties:
+                auto_save:
+                  type: boolean
+                  example: true
+                sandbox_mode:
+                  type: boolean
+                  example: false
+                gm_override:
+                  type: boolean
+                  example: false

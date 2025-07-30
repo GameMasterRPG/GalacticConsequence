@@ -9,7 +9,7 @@ nemotron_bp = Blueprint('nemotron', __name__)
 @nemotron_bp.route('/query_nemotron', methods=['POST'])
 def query_nemotron():
     """
-    Query NVIDIA Nemotron for immersive NPC dialogue with streaming response
+    Generate immersive, lore-accurate NPC dialogue
     """
     if not check_bearer_auth():
         return jsonify({'error': 'Unauthorized - Invalid Bearer token'}), 401
@@ -19,21 +19,34 @@ def query_nemotron():
     if not data:
         return jsonify({'error': 'Missing request body'}), 400
     
-    # Extract required fields
+    # Extract message field as per RPG HUD API spec
+    message = data.get('message')
+    if not message:
+        return jsonify({'error': 'Missing required field: message'}), 400
+    
+    # Optional parameters
     model = data.get('model', 'nvidia/nemotron-mini-4b-instruct')
-    messages = data.get('messages', [])
     temperature = data.get('temperature', 0.2)
     top_p = data.get('top_p', 0.7)
     max_tokens = data.get('max_tokens', 1024)
-    stream = data.get('stream', True)
     
     # Optional game context fields
     user = data.get('user')
     npc_name = data.get('npc_name')
     session_id = data.get('session_id')
+    context = data.get('context', {})
     
-    if not messages:
-        return jsonify({'error': 'Missing required field: messages'}), 400
+    # Convert message to messages format for NVIDIA API
+    messages = [
+        {
+            "role": "system", 
+            "content": f"You are {npc_name or 'an NPC'} in the Star Wars universe. Respond in character with immersive, lore-accurate dialogue. Context: {context}"
+        },
+        {
+            "role": "user",
+            "content": message
+        }
+    ]
     
     # Prepare payload for NVIDIA API
     payload = {
@@ -42,73 +55,31 @@ def query_nemotron():
         'temperature': temperature,
         'top_p': top_p,
         'max_tokens': max_tokens,
-        'stream': stream
+        'stream': False  # Non-streaming for RPG HUD API compatibility
     }
     
     try:
-        if stream:
-            # Return streaming response
-            def generate():
-                full_response = ""
-                for chunk in query_nemotron_streaming(payload):
-                    if chunk:
-                        yield f"data: {json.dumps(chunk)}\n\n"
-                        # Collect full response for NPC memory update
-                        if 'choices' in chunk and chunk['choices']:
-                            delta = chunk['choices'][0].get('delta', {})
-                            content = delta.get('content', '')
-                            if content:
-                                full_response += content
-                
-                # Update NPC memory after complete response
-                if user and npc_name and full_response:
-                    update_npc_interaction(
-                        npc_name=npc_name,
-                        user=user,
-                        interaction_type='dialogue',
-                        interaction_data={
-                            'player_message': messages[-1].get('content', '') if messages else '',
-                            'npc_response': full_response,
-                            'context': messages[0].get('content', '') if messages else ''
-                        },
-                        session_id=session_id
-                    )
-                
-                yield f"data: {json.dumps({'done': True})}\n\n"
-            
-            return Response(
-                generate(),
-                mimetype='text/event-stream',
-                headers={
-                    'Cache-Control': 'no-cache',
-                    'Connection': 'keep-alive',
-                    'Access-Control-Allow-Origin': '*'
-                }
+        # Get non-streaming response
+        from utils.nvidia_client import query_nemotron_direct
+        response = query_nemotron_direct(payload)
+        
+        # Update NPC memory if context provided
+        if user and npc_name and response.get('choices'):
+            full_response = response['choices'][0]['message']['content']
+            update_npc_interaction(
+                npc_name=npc_name,
+                user=user,
+                interaction_type='dialogue',
+                interaction_data={
+                    'player_message': message,
+                    'npc_response': full_response,
+                    'context': str(context)
+                },
+                session_id=session_id
             )
-        else:
-            # Return single response
-            response = query_nemotron_streaming(payload, stream=False)
-            
-            # Update NPC memory
-            if user and npc_name and response:
-                npc_response = ""
-                if 'choices' in response and response['choices']:
-                    npc_response = response['choices'][0].get('message', {}).get('content', '')
-                
-                if npc_response:
-                    update_npc_interaction(
-                        npc_name=npc_name,
-                        user=user,
-                        interaction_type='dialogue',
-                        interaction_data={
-                            'player_message': messages[-1].get('content', '') if messages else '',
-                            'npc_response': npc_response,
-                            'context': messages[0].get('content', '') if messages else ''
-                        },
-                        session_id=session_id
-                    )
-            
-            return jsonify(response)
+        
+        # Return response in RPG HUD API format
+        return jsonify(response)
     
     except Exception as e:
         return jsonify({
