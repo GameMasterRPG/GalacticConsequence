@@ -1,0 +1,33 @@
+# Core Flask
+Flask==2.3.2
+gunicorn==21.2.0
+
+
+# Flask Extensions
+flask_sqlalchemy==3.1.1
+flask_jwt_extended==4.5.2
+flask_cors==4.0.0
+flask_migrate==4.0.5
+flask_swagger_ui==4.11.1
+
+# Schema & Validation
+marshmallow==3.20.1
+marshmallow-sqlalchemy==0.29.0
+
+# Environment & Config
+python-dotenv==1.0.1
+
+# HTTP & Requests
+requests==2.31.0
+
+# Database Drivers (Optional)
+psycopg2-binary==2.9.9       # For PostgreSQL
+# pymongo==4.7.1             # For MongoDB (optional)
+
+# Extras (optional, only if used)
+# Pillow==10.2.0             # For image handling
+# boto3==1.34.0              # AWS SDK (optional)
+
+# If you're using Fla or similar
+# flask-restful==sk-RESTful0.3.10
+
